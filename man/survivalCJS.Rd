@@ -9,11 +9,11 @@ Survival from recapture data with Cormack-Jolly-Seber (CJS) model
 Calculation of apparent survival (accounting for recapture probability) from mark-recapture data, with time-dependent phi or p, possibly with covariates. Function \code{survCHSaj} allows for different survival parameters for juveniles and adults; juveniles are assumed to become adults after the first interval. \code{BsurvCJS} is a Bayesian version.
 }
 \usage{
-survCJS(DH, model=list(phi~1, p~1), data=NULL, freq=1, group, ci = 0.95,
-    link=c("logit", "probit"))
+survCJS(DH, model=list(phi~1, p~1), data=NULL, freq=1, group, interval=1,
+    ci = 0.95, link=c("logit", "probit"), ...)
 
 survCJSaj(DHj, DHa=NULL, model=list(phiJ~1, phiA~1, p~1), data=NULL,
-    freqj=1, freqa=1, ci = 0.95, link=c("logit", "probit"))
+    freqj=1, freqa=1, ci = 0.95, link=c("logit", "probit"), ...)
 
 BsurvCJS(DH, model=list(phi~1, p~1), data = NULL, freq=1, priors=NULL,
     chains=3, sample=1e4, burnin=1000, thin=1, adapt=1000,
@@ -35,6 +35,9 @@ a scalar or a vector of length \code{nrows(DH)} with the frequency of each detec
   \item{group}{
 an optional factor of length \code{nrows(DH)}; if provided, \code{group} can be included in the model definition, see Examples.
 }
+  \item{interval}{
+the time interval between capture occasions; scalar if all intervals are equal or a vector of length \code{ncols(DH) - 1}; the units used must be the same as those for the apparent survival estimate, eg, for annual survival use years.
+}
   \item{DHj, DHa}{
 detection history matrices for animals marked as juveniles and adults respectively; DHa should be NULL if no animals were marked as adults.
 }
@@ -47,6 +50,9 @@ the required confidence interval.
   \item{link}{
 the link function to use, either logit or probit; see \link{Links}.
 }
+  \item{...}{
+other arguments passed to \code{\link{nlm}}.
+}
   \item{priors}{
 a list with elements for prior mean and variance for coefficients; see Details.
 }
@@ -54,7 +60,7 @@ a list with elements for prior mean and variance for coefficients; see Details.
 the number of Markov chains to run.
 }
   \item{sample}{
-the number of values per chain to return. The total number of values calculated per chain is \code{adapt + burnin + sample * thin}.
+the minimum number of values to return; the actual number returned may be slightly higher, as it will be a multiple of \code{chains}.
 }
   \item{burnin}{
 the number of values to discard at the beginning of each chain.
@@ -123,6 +129,10 @@ df <- data.frame(flood = c(FALSE, TRUE, TRUE, FALSE, FALSE, FALSE))
 survCJS(DH, phi ~ flood, data=df)  # the phi(flood) p(.) model
 # Including a grouping factor:
 survCJS(DH, phi ~ flood*group, data=df, group=dippers$sex)
+
+# With unequal intervals - suppose no data were collected in year 5:
+DH1 <- DH[, -5]
+survCJS(DH1, phi ~ .time, interval = c(1, 1, 1, 2, 1))
 
 # See also the examples in the dippers help file.
 }

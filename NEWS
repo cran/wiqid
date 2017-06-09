@@ -1,0 +1,10 @@
+CHANGES in 0.1.1 (2017-06-09)
+
+  * Added 'coef', 'vcov' and 'predict' methods for 'wiqid' objects.
+
+  * 'survCJS' gains an 'interval' argument to deal with time intervals of unequal length.
+
+  * dots argument added to MLE functions to pass parameters to 'nlm'.
+
+  * Improved coding of several functions to prevent under/overflow issues.
+

@@ -13,9 +13,13 @@ test_that("occSS0 with logit link",  {
   BRS <- salamanders
   n <- rowSums(!is.na(BRS))
   y <- rowSums(BRS > 0, na.rm=TRUE)
+  # Check dots passed to nlm
+  expect_warning(occSS0(y, n, iterlim=4),
+      "Convergence may not have been reached")
   brs1 <- occSS0(y, n)
   expect_that(class(brs1), equals(c("wiqid", "list")))
-  expect_that(names(brs1), equals(c("call", "link", "beta", "beta.vcv", "real", "logLik")))
+  expect_that(names(brs1), equals(c("call", "link", "beta", "beta.vcv", "real", "logLik",
+       "ci", "formulae", "index")))
   expect_that(is.call(brs1$call), is_true())
   expect_that(colnames(brs1$real), equals(c("est", "lowCI", "uppCI")))
   expect_that(rownames(brs1$real), equals(c("psiHat", "pHat")))
@@ -82,7 +86,8 @@ test_that("occSS0 with probit link",  {
   y <- rowSums(BRS > 0, na.rm=TRUE)
   brs1 <- occSS0(y, n, link="probit")
   expect_that(class(brs1), equals(c("wiqid", "list")))
-  expect_that(names(brs1), equals(c("call", "link", "beta", "beta.vcv", "real", "logLik")))
+  expect_that(names(brs1), equals(c("call", "link", "beta", "beta.vcv", "real", "logLik",
+       "ci", "formulae", "index")))
   expect_that(is.call(brs1$call), is_true())
   expect_that(colnames(brs1$real), equals(c("est", "lowCI", "uppCI")))
   expect_that(rownames(brs1$real), equals(c("psiHat", "pHat")))

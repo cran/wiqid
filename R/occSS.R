@@ -1,9 +1,10 @@
 # Single season occupancy with site and survey covariates.
 
 # 'link' argument added 2015-02-20
+# modifications to allow 'predict' 2017-02-09
 
 occSS <- function(DH, model=NULL, data=NULL, ci=0.95, link=c("logit", "probit"),
-  verify=TRUE) {
+  verify=TRUE, ...) {
   # single-season occupancy models with site and survey covatiates
   # ** DH is detection data in a 1/0/NA matrix or data frame, sites in rows,
   #    detection occasions in columns..
@@ -18,7 +19,7 @@ occSS <- function(DH, model=NULL, data=NULL, ci=0.95, link=c("logit", "probit"),
   if(is.null(model)) {
     y <- rowSums(DH, na.rm=TRUE)
     n <- rowSums(!is.na(DH))
-    return(occSS0(y, n, ci=ci, link=link))
+    return(occSS0(y, n, ci=ci, link=link, ...))
   }
   crit <- fixCI(ci)
 
@@ -42,13 +43,19 @@ occSS <- function(DH, model=NULL, data=NULL, ci=0.95, link=c("logit", "probit"),
     site.names <- 1:nSites
 
   # Convert the covariate data frame into a list
-  dataList <- stddata(data, nSurv)
+  dataList <- stddata(data, nSurv, scaleBy=NULL)
   time <- rep(1:nSurv, each=nSites)
-  dataList$.Time <- as.vector(scale(time)) /2
+  # dataList$.Time <- as.vector(scale(time)) /2
+  dataList$.Time <- time
   dataList$.time <- as.factor(time)
-  before <- cbind(0L, DH[, 1:(nSurv - 1)]) # 1 if animal seen on previous occasion
+  before <- cbind(FALSE, DH[, 1:(nSurv - 1)] > 0) # 1 if animal seen on previous occasion
   dataList$.b <- as.vector(before)
-
+  # Get factor levels and scaling values (needed for prediction)
+  xlev <- lapply(dataList[sapply(dataList, is.factor)], levels)
+  scaling <- lapply(dataList[sapply(dataList, is.numeric)],
+    getScaling, scaleBy = 0.5)
+  dataList <- lapply(dataList, doScaling, scaleBy = 0.5)
+  
   survey.done <- !is.na(as.vector(DH))
   DHvec <- as.vector(DH)[survey.done]
   siteID <- as.factor(row(DH))[survey.done]
@@ -97,8 +104,12 @@ occSS <- function(DH, model=NULL, data=NULL, ci=0.95, link=c("logit", "probit"),
   }
 
   # Run mle estimation with nlm:
-  param <- rep(0, K)
-  res <- nlm(nll, param, hessian=TRUE)
+  # res <- nlm(nll, param, hessian=TRUE)
+  nlmArgs <- list(...)
+  nlmArgs$f <- nll
+  nlmArgs$p <- rep(0, K)
+  nlmArgs$hessian <- TRUE
+  res <- do.call(nlm, nlmArgs)
   if(res$code > 2)   # exit code 1 or 2 is ok.
     warning(paste("Convergence may not have been reached (code", res$code, ")"))
   beta.mat[,1] <- res$estimate
@@ -111,6 +122,7 @@ occSS <- function(DH, model=NULL, data=NULL, ci=0.95, link=c("logit", "probit"),
   # if (!inherits(varcov0, "try-error") && all(diag(varcov0) > 0)) {
   if (!inherits(varcov0, "try-error")) {
     varcov <- varcov0
+    rownames(varcov) <- rownames(beta.mat)
     SE <- suppressWarnings(sqrt(diag(varcov)))
     beta.mat[, 2] <- SE
     beta.mat[, 3:4] <- sweep(outer(SE, crit), 1, res$estimate, "+")
@@ -123,7 +135,12 @@ occSS <- function(DH, model=NULL, data=NULL, ci=0.95, link=c("logit", "probit"),
               beta = beta.mat,
               beta.vcv = varcov,
               real = plink(lp.mat),
-              logLik = c(logLik=logLik, df=K, nobs=nrow(DH)))
+              logLik = c(logLik=logLik, df=K, nobs=nrow(DH)),
+              ci = ci,
+              formulae = model,
+              index = list(psi=1:psiK, p=(psiK+1):K),
+              xlev = xlev,
+              scaling = scaling)
   class(out) <- c("wiqid", "list")
   return(out)
 }

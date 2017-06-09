@@ -8,6 +8,9 @@ context("Closed captures/CHmatrix")
 
 test_that("closedCapMb gives right answers",  {
   data(KanhaTigers)
+  # Check dots passed to nlm
+  expect_warning(closedCapMb(KanhaTigers, iterlim=4),
+      "Convergence may not have been reached")
   res <- closedCapMb(KanhaTigers)
   resM <- closedCapMb(KanhaTigers, ciType='MARK')
   expect_that(class(res), equals(c("wiqid", "list"))) 
@@ -15,13 +18,9 @@ test_that("closedCapMb gives right answers",  {
   expect_that(colnames(res$real), equals(c("est", "lowCI", "uppCI")))
   expect_that(rownames(res$real), equals(c("Nhat", "phat", "chat")))
   expect_that(rownames(resM$real), equals(c("Nhat", "phat", "chat")))
-  if(getRversion() < "3.3.0") {
-    expect_that(round(as.vector(res$real[1, ]), 3), 
-        is_equivalent_to(c(26.939, 26.021, 67.957)))
-  } else {
-    expect_that(round(as.vector(res$real[1, ]), 3), 
-        is_equivalent_to(c(26.939, 26.021, 67.959)))
-  }
+  expect_that(round(as.vector(res$real[1, ]), 2), 
+        is_equivalent_to(c(26.94, 26.02, 67.96)))
+  # Different R versions give different results for the 3rd decimal place.
   expect_that(round(as.vector(resM$real[1, ]), 3), 
       is_equivalent_to(c(26.939, 26.081, 36.858)))
       # MARK gives 36.861 for the upper limit
@@ -43,6 +42,9 @@ test_that("closedCapMb gives right answers",  {
 
 test_that("closedCapMt gives right answers",  {
   data(KanhaTigers)
+  # Check dots passed to nlm
+  expect_warning(closedCapMt(KanhaTigers, iterlim=4),
+      "Convergence may not have been reached")
   res <- closedCapMt(KanhaTigers)
   resM <- closedCapMt(KanhaTigers, ciType='MARK')
   expect_that(class(res), equals(c("wiqid", "list"))) 
@@ -79,6 +81,9 @@ test_that("closedCapMt gives right answers",  {
 
 test_that("closedCapMtcov gives right answers",  {
   data(KanhaTigers)
+  # Check dots passed to nlm
+  expect_warning(closedCapMtcov(KanhaTigers, iterlim=4),
+      "Convergence may not have been reached")
   res0 <- closedCapMtcov(KanhaTigers)
   expect_that(class(res0), equals(c("wiqid", "list"))) 
   expect_that(names(res0), equals(c("call", "beta", "beta.vcv", "real", "logLik"))) 
@@ -95,6 +100,9 @@ test_that("closedCapMtcov gives right answers",  {
   set.seed(123)
   covars <- data.frame(Temp = runif(ncol(KanhaTigers), 15, 25),
       Cloud = sample(0:8, ncol(KanhaTigers), replace=TRUE))
+  # Check dots passed to nlm
+  expect_warning(closedCapMtcov(KanhaTigers, p~Cloud, data=covars, iterlim=4),
+      "Convergence may not have been reached")
   resC <- closedCapMtcov(KanhaTigers, p~Cloud, data=covars)
   expect_that(round(as.vector(resC$real[1, ]), 3), 
       is_equivalent_to(c(28.444, 26.428, 39.951)))

@@ -11,13 +11,13 @@ Multi-season occupancy estimation
 Functions to estimate occupancy from detection/non-detection data for multiple seasons. \code{occMS} is the general purpose function; it allows for site-, season- and survey-level covariates, but it is slow. \code{occMScovSite} excludes survey-level covariates, but is fast. \code{occMStime} and \code{occMS0} are simpler and faster.
 }
 \usage{
-occMS0(DH, occsPerSeason, ci=0.95, verify=TRUE)
+occMS0(DH, occsPerSeason, ci=0.95, verify=TRUE, ...)
 
-occMStime(DH, occsPerSeason, model=NULL, data=NULL, ci=0.95, verify=TRUE)
+occMStime(DH, occsPerSeason, model=NULL, data=NULL, ci=0.95, verify=TRUE, ...)
 
-occMS(DH, occsPerSeason, model=NULL, data=NULL, ci=0.95, verify=TRUE)
+occMS(DH, occsPerSeason, model=NULL, data=NULL, ci=0.95, verify=TRUE, ...)
              
-occMScovSite(DH, occsPerSeason, model=NULL, data=NULL, ci=0.95, verify=TRUE)
+occMScovSite(DH, occsPerSeason, model=NULL, data=NULL, ci=0.95, verify=TRUE, ...)
 }
 \arguments{
  \item{DH}{
@@ -38,6 +38,9 @@ the confidence interval to use.
   \item{verify}{
 if TRUE, the data provided will be checked.
 }
+  \item{...}{
+other arguments passed to \code{\link{nlm}}.
+}
 }
 \details{
 \code{occMS0} implements a simple multi-season model with one parameter each for initial occupancy, colonisation, local extinction, and probability of detection, ie. a \code{psi1(.) gamma(.) epsilon(.) p(.)} model.
@@ -49,15 +52,7 @@ if TRUE, the data provided will be checked.
 \code{occMS} allows for survey-level covariates in addition to the above, and separate covariates for between-season colonisation and local extinction.
 }
 \value{
-Returns an object of class \code{wiqid}, which is a list with the following elements:
-
-  \item{call}{The call used to produce the results}
-  \item{beta}{Values of the coefficients of the terms in the linear predictors, with standard errors and confidence intervals.}
-  \item{beta.vcv }{The variance-covariance matrix for the beta estimates.}
-  \item{real}{Estimates of occupancy and probability of detection on the real scale, with confidence intervals; \code{occSSrn} gives occupancy, lambda and r.}
-  \item{logLik}{a vector with elements for log(likelihood), number of parameters, and effective sample size. If parameters \emph{and their SEs} cannot be estimated, the first element should be \code{NA}.}
-
-There are \code{print}, \code{logLik}, and \code{nobs} methods for class \code{wiqid}.
+Returns an object of class \code{wiqid}, see \link{wiqid-class} for details.
 }
 
 \section{Benchmarks}{Output has been checked against output from PRESENCE (Hines 2006) v.5.5 for the \code{\link{GrandSkinks}} data set. Real values are mostly the same to 4 decimal places, though there is occasionally a discrepancy of 0.0001. AICs are the same.

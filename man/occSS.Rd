@@ -11,14 +11,14 @@ Single-season occupancy estimation
 Functions to estimate occupancy from detection/non-detection data for a single season. \code{occSS} is the general-purpose function, and \code{occSStime} provides plots of detection probability against time. \code{occSS0} and \code{occSScovSite} are faster functions for simpler models with summarized data. See \code{occSSrn} for the Royle-Nichols model for abundance-induced heterogeneity in detection probability.
 }
 \usage{
-occSS(DH, model=NULL, data = NULL, ci=0.95, link=c("logit", "probit"), verify=TRUE)
+occSS(DH, model=NULL, data = NULL, ci=0.95, link=c("logit", "probit"), verify=TRUE, ...)
 
 occSStime(DH, model=p~1, data=NULL, ci=0.95, plot=TRUE, link=c("logit", "probit"),
-  verify=TRUE)
+  verify=TRUE, ...)
 
-occSS0(y, n, ci=0.95, link=c("logit", "probit"))
+occSS0(y, n, ci=0.95, link=c("logit", "probit"), ...)
 
-occSScovSite(y, n, model=NULL, data = NULL, ci=0.95, link=c("logit", "probit"))
+occSScovSite(y, n, model=NULL, data = NULL, ci=0.95, link=c("logit", "probit"), ...)
 
 }
 \arguments{
@@ -49,10 +49,13 @@ a vector with the number of detections at each site.
   \item{n}{
 a scalar or vector with the number of visits (survey occasions) at each site.
 }
+  \item{...}{
+other arguments passed to \code{\link{nlm}}.
+}
 }
 \details{
 
-\code{occSS} allows for psi or p to be modelled as a logistic function of site covariates or survey covariates, as specified by \code{model}. It includes a built in \code{.time} covariate which can be used for modelling p with time as a fixed effect, and \code{.Time} for a linear or quadratic trend. A built-in \code{.b} covariate corresponds to a behavioural effect, where detection depends on whether the species was detected on the previous occasion or not.
+\code{occSS} allows for psi or p to be modelled as a logistic or probit function of site covariates or survey covariates, as specified by \code{model}. It includes a built in \code{.time} covariate which can be used for modelling p with time as a fixed effect, and \code{.Time} for a linear or quadratic trend. A built-in \code{.b} covariate corresponds to a behavioural effect, where detection depends on whether the species was detected on the previous occasion or not.
 
 \code{occSStime} allows for time-varying covariates that are the same across all sites, eg, moon-phase. A categorical time variable \code{.time} and a time trend \code{.Time} are built-in. A plot of detection probability vs time is produced if \code{plot=TRUE}.
 
@@ -65,15 +68,8 @@ Numeric covariates in \code{data} are standardised to facilitate convergence. Th
 For speed, use the simplest function which will cope with your model. For example, you can run psi(.) p(.) models in \code{occSScovSite} or \code{occSS}, but \code{occSS0} is much faster.
 }
 \value{
-Returns an object of class \code{wiqid}, which is a list with the following elements:
+Returns an object of class \code{wiqid}, see \link{wiqid-class} for details.
 
-  \item{call}{The call used to produce the results}
-  \item{beta}{Values of the coefficients of the terms in the linear predictors, with standard errors and confidence intervals.}
-  \item{beta.vcv }{The variance-covariance matrix for the beta estimates.}
-  \item{real}{Estimates of occupancy and probability of detection on the real scale, with confidence intervals.}
-  \item{logLik}{a vector with elements for log(likelihood), number of parameters, and effective sample size. If parameters \emph{and their SEs} cannot be estimated, the first element should be \code{NA}.}
-
-There are \code{print}, \code{logLik}, and \code{nobs} methods for class \code{wiqid}.
 }
 
 \section{Benchmarks}{Output has been checked against output from PRESENCE (Hines 2006) v.5.5 for the \code{\link{salamanders}} and \code{\link{weta}} data sets. Real values are mostly the same to 4 decimal places, though there is occasionally a discrepancy of 0.0001. AICs are the same.

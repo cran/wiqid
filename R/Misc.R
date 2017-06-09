@@ -2,7 +2,8 @@
 # This file contains utilities used in several places in the code
 #   and NOT exported:
 
-# logSumExp: sum probabilities without over/underflow
+# getScaling, doScaling, scaleToMatch : functions to deal with scaling
+# logSumExp, log1minusExp : handle probabilities without over/underflow
 # signifish : an alternative to signif (added 10-02-2015)
 # fixCI : Calculate critical values for CI.
 # fixNames : Tidy up the column names in MCMC output: remove [] and , and make names unique.
@@ -11,11 +12,41 @@
 # stddata : Convert a data frame of site and survey data into a list and standardise
 # selectCovars : Pull the covars needed for a model matrix into a specific data frame
 # AICtable moved to file AICc.R
+# ...............................................................................
+
+# Functions to deal with scaling, can be used with s/lapply
+
+getScaling <- function(x, scaleBy)
+  c(mean(x, na.rm=TRUE), sd(x, na.rm=TRUE) / scaleBy)
+  
+doScaling <- function(x, scaleBy)
+  if(is.numeric(x)) (x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE) * scaleBy else x
+  
+# This takes a whole data frame
+scaleToMatch <- function(target, scaling) {
+  for(i in seq_along(target)) {
+    if(is.numeric(target[[i]])) {
+      pos <- match(names(target)[i], names(scaling))
+      if(!is.na(pos)) {
+        sc <- scaling[[pos]]
+        target[[i]] <- (target[[i]] - sc[1]) / sc[2]
+      }
+    }
+  }
+  return(target)
+}
+
+# ...............................................................................
 
 # logSumExp: sum probabilities without over/underflow
-
+# x is a vector with log(p); return value is log(sum(p)), scalar
 logSumExp <- function(x)
   log(sum(exp(x - max(x)))) + max(x)
+
+# log1minusExp: get 1 - p without over/underflow
+# x is a vector with log(p); return value is vector with log(1 - p)
+log1minusExp <- function(x)
+  ifelse(x > log(0.5), log(-expm1(x)), log1p(-exp(x)))
 
 # ...............................................................................
 

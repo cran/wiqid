@@ -1,5 +1,7 @@
 # Print, plot, window, head and tail methods for class Bwiqid, ie. MCMC output
 
+# View.Bwiqid moved to its own file 30 May 2017
+
 print.Bwiqid <- function(x, digits=4, ...)  {
   if(!inherits(x, "data.frame"))
     stop("x is not a valid Bwiqid object")

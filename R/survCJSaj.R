@@ -6,29 +6,37 @@
 # Data should be organised as 2 detection history matrices, one for juveniles and one for
 #   adults (when juveniles are recaptured they are already adults).
 
-qArrayAJ <- function(phi, p, phiJ=phi) {
-  # Calculates the matrix of multinomial cell probabilities
+# qArrayAJ <- function(phi, p, phiJ=phi) {
+log_qArrayAJ <- function(log_phi, log_p, log_1mp, log_phiJ=log_phi) {
+  # Calculates the matrix of multinomial cell log(probabilities)
   #   corresponding to an m-array.
-  # phi = vector of apparent survival probabilities
-  # phiJ = vector of apparent survival probabilities for juveniles
-  # p = vector of recapture probabilities
+  # log_phi = vector of log(apparent survival probabilities)
+  # log_phiJ = vector of log(apparent survival probabilities) for juveniles
+  # log_p = vector of log(recapture probabilities)
+  # log_1mp = vector of log(1 - recapture probabilities)
   # NO SANITY CHECKS, calling function must take care of this.
 
-  n <- length(phi)
+  n <- length(log_phi)
 
-  q <- diag(as.vector(p * phiJ), n, n+1)  # Create n x n+1 matrix and fill diagonal
-  for (i in 1:(n-1)){ # Fill the upper triangle
+  # Create n x n+1 matrix and fill diagonal
+  q <- diag(as.vector(log_p + log_phiJ), n, n+1)
+  # Fill the upper triangle, and get the row sums
+  sum_probs <- numeric(n)
+  for (i in 1:(n-1)){ 
     for (j in (i+1):n) {
-      q[i,j] <- phiJ[i]*prod(phi[(i+1):j])*prod(1-p[i:(j-1)])*p[j]
+      q[i,j] <- log_phiJ[i] + sum(log_phi[(i+1):j]) + sum(log_1mp[i:(j-1)]) + log_p[j]
     }
+    sum_probs[i] <- logSumExp(q[i, i:n])
   }
-  q[, n+1] <- 1 - rowSums(q, na.rm=TRUE)  # Add the last column and return
+  sum_probs[n] <- q[n, n]
+  # Add the last column and return
+  q[, n+1] <- log1minusExp(sum_probs) 
   return(q)
 }
 # ..........................................................................
 
 survCJSaj <- function(DHj, DHa=NULL, model=list(phiJ~1, phiA~1, p~1), data=NULL,
-    freqj=1, freqa=1, ci = 0.95, link=c("logit", "probit")) {
+    freqj=1, freqa=1, ci = 0.95, link=c("logit", "probit"), ...) {
   # phi(t) p(t) model or models with time covariates for Cormack-Joly-Seber
   # estimation of apparent survival.
   # ** DHj is detection history matrix/data frame, animals x occasions, for animals marked as juveniles; DHa (optional) has detection histories for animals marked as adults.
@@ -129,20 +137,26 @@ survCJSaj <- function(DHj, DHa=NULL, model=list(phiJ~1, phiA~1, p~1), data=NULL,
     phiABeta <- param[parID==1]
     phiJBeta <- param[parID==2]
     pBeta <- param[parID==3]
-    phiAProb <- plink(phiAMat %*% phiABeta)
-    phiJProb <- plink(phiJMat %*% phiJBeta)
-    pProb <- plink(pMat %*% pBeta)
-    if(any(pProb * phiAProb == 1) || any(pProb * phiJProb == 1) )
-      return(.Machine$double.max)
+    log_phiA <- plink(phiAMat %*% phiABeta, log.p=TRUE)
+    log_phiJ <- plink(phiJMat %*% phiJBeta, log.p=TRUE)
+    link_p <- pMat %*% pBeta
+    log_p <- plink(link_p, log.p=TRUE)
+    log_1mp <- plink( -link_p, log.p=TRUE)
     # Calculate the negative log(likelihood) value:
-    return(min(-sum(marrayA  * log(qArrayAJ(phiAProb, pProb, phiAProb)),   # adults
-            marrayJ * log(qArrayAJ(phiAProb, pProb, phiJProb)), na.rm=TRUE),   # juveniles
+    return(min(-sum(marrayA  * log_qArrayAJ(log_phiA, log_p, log_1mp, log_phiA),   # adults
+            marrayJ * log_qArrayAJ(log_phiA, log_p, log_1mp, log_phiJ)),   # juveniles
           .Machine$double.xmax))
   }
 
   # Run mle estimation with nlm:
-  param <- rep(0, K)
-  res <- nlm(nll, param, hessian=TRUE, stepmax=10) # 2015-03-01
+  # res <- nlm(nll, param, hessian=TRUE, stepmax=10) # 2015-03-01
+  nlmArgs <- list(...)
+  nlmArgs$f <- nll
+  nlmArgs$p <- rep(0, K)
+  nlmArgs$hessian <- TRUE
+  if(is.null(nlmArgs$stepmax))
+    nlmArgs$stepmax <- 10
+  res <- do.call(nlm, nlmArgs)
   if(res$code > 2)   # exit code 1 or 2 is ok.
     warning(paste("Convergence may not have been reached (nlm code", res$code, ")"))
 

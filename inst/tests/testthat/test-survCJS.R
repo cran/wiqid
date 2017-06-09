@@ -12,6 +12,9 @@ test_that("survCJS gives right answers",  {
   # Data set (Lebreton et al dippers)
   data(dippers)
   DH <- dippers[, 1:7]
+  # Check dots passed to nlm
+  expect_warning(survCJS(DH, iterlim=4),
+      "Convergence may not have been reached")
   res <- survCJS(DH)  # default is a phi(.) p(.) model
   expect_that(class(res), equals(c("wiqid", "list")))
   expect_that(names(res), equals(c("call", "beta", "beta.vcv", "real", "logLik")))
@@ -62,6 +65,14 @@ test_that("survCJS gives right answers",  {
                 0.4833, 0.3612, 0.6073,
                 0.8999, 0.8263, 0.9444)))  # MARK output
   expect_that(round(AIC(res), 4), equals(669.9911)) # MARK output
+  
+  # Check with unequal intervals
+  DH1 <- DH[, -5]
+  res1 <- survCJS(DH1, phi ~ .time, interval = c(1,1,1,2,1))
+  expect_equal(rownames(res1$beta), c("phi: (Intercept)", "phi: .time2",
+          "phi: .time3", "phi: .time4", "phi: .time5", "p: (Intercept)"))
+  expect_equivalent(round(colMeans(res1$real), 4), c(0.7120, 0.5789, 0.8121))
+  expect_equal(round(AIC(res1), 4), 520.4062)
 }  )
 # .........................................................................
 

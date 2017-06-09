@@ -13,11 +13,12 @@ Function \code{occSSrn} allows for site-specific covariates to be included in th
 }
 \usage{
 
-occSSrn(DH, model=NULL, data = NULL, ci=0.95, link=c("logit", "probit"), verify=TRUE)
+occSSrn(DH, model=NULL, data = NULL, ci=0.95, link=c("logit", "probit"),
+    verify=TRUE, ...)
 
-occSSrn0(y, n, ci=0.95, link=c("logit", "probit"))
+occSSrn0(y, n, ci=0.95, link=c("logit", "probit"), ...)
 
-occSSrnSite(y, n, model=NULL, data = NULL, ci=0.95, link=c("logit", "probit"))
+occSSrnSite(y, n, model=NULL, data = NULL, ci=0.95, link=c("logit", "probit"), ...)
 
 }
 \arguments{
@@ -47,6 +48,9 @@ a vector with the number of detections at each site.
   \item{n}{
 a scalar or vector with the number of visits (survey occasions) at each site.
 }
+  \item{...}{
+other arguments passed to \code{\link{nlm}}.
+}
 
 }
 \details{
@@ -55,15 +59,8 @@ Numeric covariates in \code{data} are standardised to facilitate convergence. Th
 
 }
 \value{
-Returns an object of class \code{wiqid}, which is a list with the following elements:
+Returns an object of class \code{wiqid}, see \link{wiqid-class} for details.
 
-  \item{call}{The call used to produce the results}
-  \item{beta}{Values of the coefficients of the terms in the linear predictors, with standard errors and confidence intervals.}
-  \item{beta.vcv }{The variance-covariance matrix for the beta estimates.}
-  \item{real}{Estimates of occupancy, lambda and r on the real scale, with confidence intervals.}
-  \item{logLik}{a vector with elements for log(likelihood), number of parameters, and effective sample size. If parameters \emph{and their SEs} cannot be estimated, the first element should be \code{NA}.}
-
-There are \code{print}, \code{logLik}, and \code{nobs} methods for class \code{wiqid}.
 }
 
 \section{Benchmarks}{Output has been checked against output from PRESENCE (Hines 2006) v.6.9 for the \code{\link{weta}} data set. Real values are mostly the same to 4 decimal places, though there is occasionally a discrepancy of 0.001. AICs are the same.

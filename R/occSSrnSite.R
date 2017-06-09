@@ -3,9 +3,10 @@
 #   (not survey covariates)
 
 # 'link' argument added 2015-02-20
+# stuff predict added 2017-02-15
 
 occSSrnSite <- function(y, n, model=NULL, data=NULL,
-    ci=0.95, link=c("logit", "probit")) {
+    ci=0.95, link=c("logit", "probit"), ...) {
   # single-season occupancy models with site-specific covatiates
   # y is a vector with the number of detections at each site.
   # n is a vector with the number of occasions at each site.
@@ -31,7 +32,12 @@ occSSrnSite <- function(y, n, model=NULL, data=NULL,
 
   # Convert the covariate data frame into a list
   nSites <- length(y)
-  dataList <- stddata(data, nocc=NULL)
+  dataList <- stddata(data, nocc=NULL, scaleBy=NULL)
+  # Get factor levels and scaling values (needed for prediction)
+  xlev <- lapply(dataList[sapply(dataList, is.factor)], levels)
+  scaling <- lapply(dataList[sapply(dataList, is.numeric)],
+    getScaling, scaleBy = 0.5)
+  dataList <- lapply(dataList, doScaling, scaleBy = 0.5)
 
   lamDf <- selectCovars(model$lambda, dataList, nSites)
   if (nrow(lamDf) != nSites)
@@ -44,6 +50,7 @@ occSSrnSite <- function(y, n, model=NULL, data=NULL,
   rModMat <- model.matrix(model$r, rDf)
   rK <- ncol(rModMat)
   K <- lamK + rK
+  
   # model.matrix removes rows with NAs:
   if(nrow(lamModMat) != nSites || nrow(rModMat) != nSites)
     stop("Missing site covariates are not allowed.")
@@ -76,9 +83,13 @@ occSSrnSite <- function(y, n, model=NULL, data=NULL,
   }
 
   # Run mle estimation with nlm:
-  param <- rep(0, K)
   Nmax <- 100
-  res <- nlm(nll, param, hessian=TRUE)
+  # res <- nlm(nll, param, hessian=TRUE)
+  nlmArgs <- list(...)
+  nlmArgs$f <- nll
+  nlmArgs$p <- rep(0, K)
+  nlmArgs$hessian <- TRUE
+  res <- do.call(nlm, nlmArgs)
   if(res$code > 2)   # exit code 1 or 2 is ok.
     warning(paste("Convergence may not have been reached (nlm code", res$code, ")"))
 
@@ -108,11 +119,17 @@ occSSrnSite <- function(y, n, model=NULL, data=NULL,
   rownames(realPsi) <- paste("psi:", 1:nSites, sep="")
 
   out <- list(call = match.call(),
-              link = match.arg(link),
+              link = c(lambda = "log", r = match.arg(link)),
               beta = beta.mat,
               beta.vcv = varcov,
               real = rbind(realPsi, realLam, realR),
-              logLik = c(logLik=logLik, df=K, nobs=length(y)))
+              logLik = c(logLik=logLik, df=K, nobs=length(y)),
+              ci = ci,
+              formulae = model,
+              index = list(lambda=1:lamK, r=(lamK+1):K),
+              xlev = xlev,
+              scaling = scaling)
+
   class(out) <- c("wiqid", "list")
   return(out)
 }
