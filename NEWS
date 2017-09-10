@@ -1,3 +1,9 @@
+CHANGES in 0.1.2 (2017-09-10)
+
+  * Added diagPlot function and improved other diagnostic plots.
+
+  * Added function Bpoisson; Bbinom renamed Bbinomial
+
 CHANGES in 0.1.1 (2017-06-09)
 
   * Added 'coef', 'vcov' and 'predict' methods for 'wiqid' objects.
