@@ -18,12 +18,12 @@ test_that("BoccSS0 gives same answers",  {
   expect_that(names(Bout), equals(c("psi", "p")))
   expect_that(attr(Bout, "header"), equals("Model fitted in R with a Gibbs sampler"))
   expect_that(attr(Bout, "n.chains"), equals(3))
-  expect_equivalent(round(attr(Bout, "n.eff")), c(4435, 5987))
+  expect_equivalent(round(attr(Bout, "n.eff")), c(4440, 5999))
   expect_equivalent(round(attr(Bout, "Rhat"), 3), c(1, 1))
   expect_equal(as.character(attr(Bout, "call")), c("BoccSS0", "y", "n"))
 
-  expect_equivalent(round(colMeans(Bout), 4), c(0.6153, 0.2580))
-  expect_equivalent(round(c(hdi(Bout)), 4), c(0.3770, 0.8619, 0.1503, 0.3660))
+  expect_equivalent(round(colMeans(Bout), 4), c(0.6152, 0.2580))
+  expect_equivalent(round(c(hdi(Bout)), 4), c(0.3770, 0.8620, 0.1504, 0.3660))
 
   set.seed(234)
   Bout <- BoccSS0(y, n, psiPrior=c(5,5), pPrior=c(3,3),
@@ -31,13 +31,13 @@ test_that("BoccSS0 gives same answers",  {
   expect_that(class(Bout), equals(c("Bwiqid", "data.frame")))
   expect_that(dim(Bout), equals(c(4000, 2)))
   expect_that(attr(Bout, "n.chains"), equals(4))
-  expect_equivalent(round(attr(Bout, "n.eff")), c(1414, 1612))
-  expect_equivalent(round(attr(Bout, "Rhat"), 3), c(1.001, 1.001))
+  expect_equivalent(round(attr(Bout, "n.eff")), c(1419, 1654))
+  expect_equivalent(round(attr(Bout, "Rhat"), 3), c(1.000, 1.001))
   expect_equal(as.character(attr(Bout, "call")),
     c("BoccSS0", "y", "n", "c(5, 5)", "c(3, 3)", "4", "4000", "10" ))
 
-  expect_equivalent(round(colMeans(Bout), 4), c(0.5621, 0.2817))
-  expect_equivalent(round(c(hdi(Bout)), 4), c(0.3989, 0.7544, 0.1766, 0.3789))
+  expect_equivalent(round(colMeans(Bout), 4), c(0.5622, 0.2814))
+  expect_equivalent(round(c(hdi(Bout)), 4), c(0.3998, 0.7544, 0.1771, 0.3789))
 })
 # ............................................................
 
@@ -48,8 +48,8 @@ if(parallel::detectCores() > 3) {
     DH <- weta[, 1:5]
     weta.covs <- weta[, 6:11]
 
-    expect_output({Bout <- BoccSS(DH, sample=3000, burnin=100, seed=123)},
-    "Starting MCMC run for 3 chains with 1100 iterations.\n\nMCMC run complete.")
+    expect_message({Bout <- BoccSS(DH, sample=3000, burnin=100, seed=123)},
+    "Starting MCMC run for 3 chains with 1100 iterations")
     expect_that(class(Bout), equals(c("Bwiqid", "data.frame")))
     expect_that(dim(Bout), equals(c(3000, 2)))
     expect_that(names(Bout), equals(c("psi_(Intercept)", "p_(Intercept)")))
@@ -69,7 +69,7 @@ if(parallel::detectCores() > 3) {
       expect_equivalent(round(c(hdi(Bout)), 4),
         c(-0.1096, 0.9313, -0.7059, -0.1553))
     }
-    expect_output({Bout <- BoccSS(DH, model=list(psi~Browsed-1, p~.Time), data=weta,
+    expect_message({Bout <- BoccSS(DH, model=list(psi~Browsed-1, p~.Time), data=weta,
       priors=list(sigmaPsi=c(1,1)), chains=2, sample=2000, burnin=100,
       seed=234)}, " ")
     expect_that(class(Bout), equals(c("Bwiqid", "data.frame")))
@@ -94,8 +94,8 @@ test_that("BoccSS sequential gives same answers",  {
   DH <- weta[, 1:5]
   weta.covs <- weta[, 6:11]
 
-  expect_output({Bout <- BoccSS(DH, sample=3000, burnin=100, seed=123, parallel=FALSE)},
-  "Starting MCMC run for 3 chains with 1100 iterations.\n\nMCMC run complete.")
+  expect_message({Bout <- BoccSS(DH, sample=3000, burnin=100, seed=123, parallel=FALSE)},
+  "Starting MCMC run for 3 chains with 1100 iterations")
   expect_that(class(Bout), equals(c("Bwiqid", "data.frame")))
   expect_that(dim(Bout), equals(c(3000, 2)))
   expect_that(names(Bout), equals(c("psi_(Intercept)", "p_(Intercept)")))
@@ -115,7 +115,7 @@ test_that("BoccSS sequential gives same answers",  {
     expect_equivalent(round(c(hdi(Bout)), 4),
       c(-0.1052,  1.0259, -0.7200, -0.1142))
   }
-  expect_output({Bout <- BoccSS(DH, model=list(psi~Browsed-1, p~.Time), data=weta,
+  expect_message({Bout <- BoccSS(DH, model=list(psi~Browsed-1, p~.Time), data=weta,
     priors=list(sigmaPsi=c(1,1)), chains=1, sample=1000, burnin=100,
     seed=234)}, " ")
   expect_that(class(Bout), equals(c("Bwiqid", "data.frame")))

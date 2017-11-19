@@ -37,10 +37,11 @@ function(CH, model=list(p~1), data=NULL, ci = 0.95, ciType=c("normal", "MARK"), 
   if(N.cap > 0)  {
     nll <- function(params) {
       N <- min(exp(params[1]) + N.cap, 1e+300, .Machine$double.xmax)
-      pBeta <- params[-1]
-      p <- as.vector(plogis(pModMat %*% pBeta))
+      logitp <- pModMat %*% params[-1]
+      logp <- as.vector(plogis(logitp, log.p = TRUE))
+      log1mp <- as.vector(plogis( -logitp, log.p = TRUE))
       tmp <- lgamma(N + 1) - lgamma(N - N.cap + 1) +
-        sum(n * log(p) + (N - n) * log(1-p))
+        sum(n * logp + (N - n) * log1mp)
       return(min(-tmp, .Machine$double.xmax))
     }
     # res <- nlm(nll, params, hessian=TRUE, iterlim=1000)
@@ -62,7 +63,7 @@ function(CH, model=list(p~1), data=NULL, ci = 0.95, ciType=c("normal", "MARK"), 
       varcov <- varcov0
       beta.mat[, 2] <- suppressWarnings(sqrt(diag(varcov)))
       beta.mat[, 3:4] <- sweep(outer(beta.mat[, 2], crit), 1, res$estimate, "+")
-      temp <- diag(pModMat %*% varcov[-1, -1] %*% t(pModMat))
+      temp <- getFittedVar(pModMat, varcov[-1, -1])
       if(all(temp >= 0))  {
         SElp <- sqrt(temp)
         lp.mat[, 2:3] <- sweep(outer(SElp, crit), 1, lp.mat[, 1], "+")

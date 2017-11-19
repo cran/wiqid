@@ -37,6 +37,7 @@ occSS <- function(DH, model=NULL, data=NULL, ci=0.95, link=c("logit", "probit"),
   DH <- as.matrix(DH)
   nSites <- nrow(DH)
   nSurv <- ncol(DH)
+  notDetected <- rowSums(DH, na.rm=TRUE) == 0 # TRUE if species NOT detected at the site
   if (nSurv < 2)
     stop("More than one survey occasion is needed")
   if(is.null(site.names))
@@ -55,7 +56,7 @@ occSS <- function(DH, model=NULL, data=NULL, ci=0.95, link=c("logit", "probit"),
   scaling <- lapply(dataList[sapply(dataList, is.numeric)],
     getScaling, scaleBy = 0.5)
   dataList <- lapply(dataList, doScaling, scaleBy = 0.5)
-  
+
   survey.done <- !is.na(as.vector(DH))
   DHvec <- as.vector(DH)[survey.done]
   siteID <- as.factor(row(DH))[survey.done]
@@ -94,12 +95,16 @@ occSS <- function(DH, model=NULL, data=NULL, ci=0.95, link=c("logit", "probit"),
   nll <- function(param){
     psiBeta <- param[1:psiK]
     pBeta <- param[(psiK+1):K]
-    psiProb <- as.vector(plink(psiModMat %*% psiBeta))
-    pProb <- plink(pModMat %*% pBeta)
-    Lik1 <- DHvec*pProb + (1-DHvec) * (1-pProb)
-    Lik2 <- tapply(Lik1, siteID, prod)
-    llh <- sum(log(psiProb * Lik2 +
-          (1 - psiProb) * (rowSums(DH, na.rm=TRUE) == 0)))
+    # psiProb <- as.vector(plink(psiModMat %*% psiBeta))
+    linkpsi <- as.vector(psiModMat %*% psiBeta)
+    logpsi <- plink(linkpsi, log.p=TRUE)
+    log1mpsi <- plink( -linkpsi, log.p=TRUE)
+    linkp <- pModMat %*% pBeta
+    logp <- plink(linkp, log.p=TRUE)
+    log1mp <- plink( -linkp, log.p=TRUE)
+    logLik1 <- DHvec * logp + (1-DHvec) * log1mp
+    logLik2 <- tapply(logLik1, siteID, sum)
+    llh <- sum(logAddExp(logpsi + logLik2, log1mpsi + log(notDetected)))
     return(min(-llh, .Machine$double.xmax))
   }
 
@@ -126,8 +131,10 @@ occSS <- function(DH, model=NULL, data=NULL, ci=0.95, link=c("logit", "probit"),
     SE <- suppressWarnings(sqrt(diag(varcov)))
     beta.mat[, 2] <- SE
     beta.mat[, 3:4] <- sweep(outer(SE, crit), 1, res$estimate, "+")
-    SElp <- c(sqrt(diag(psiModMat %*% varcov[1:psiK, 1:psiK] %*% t(psiModMat))),
-              sqrt(diag(pModMat %*% varcov[(psiK+1):K, (psiK+1):K] %*% t(pModMat))))
+    # SElp <- c(sqrt(diag(psiModMat %*% varcov[1:psiK, 1:psiK] %*% t(psiModMat))),
+              # sqrt(diag(pModMat %*% varcov[(psiK+1):K, (psiK+1):K] %*% t(pModMat))))
+    SElp <- sqrt(c(getFittedVar(psiModMat, varcov[1:psiK, 1:psiK]),
+              getFittedVar(pModMat, varcov[(psiK+1):K, (psiK+1):K])))
     lp.mat[, 2:3] <- sweep(outer(SElp, crit), 1, lp.mat[, 1], "+")
   }
   out <- list(call = match.call(),

@@ -15,7 +15,7 @@ test_that("occSSrn with logit",  {
   # Check dots passed to nlm
   expect_warning(occSSrn(BRS, iterlim=4),
       "Convergence may not have been reached")
-      
+
   res <- occSSrn(BRS)
 
   expect_that(class(res), equals(c("wiqid", "list")))
@@ -43,18 +43,16 @@ test_that("occSSrn with logit",  {
   expect_that(round(AIC(res), 4), equals(148.5542))
   # Put in a row of NAs
   BRS[3,] <- NA
-  res <- occSSrn(BRS)
-  expect_that(round(as.vector(res$real), 3),
-      is_equivalent_to(c(0.635, 1.008, 0.151, 0.324, 0.392, 0.055, 0.925,
-          2.588, 0.354)))
-  expect_that(round(AIC(res), 4), equals(142.9799))
+  expect_error(occSSrn(BRS),
+    "Detection history has a row with all NAs")
   # Put in a column of NAs
+  BRS <- salamanders
   BRS[, 3] <- NA
   res <- occSSrn(BRS)
   expect_that(round(as.vector(res$real), 4),
-      is_equivalent_to(c(0.4030, 0.5158, 0.2464, 0.1915, 0.2126, 0.0957, 0.7139,
-          1.2513, 0.5026)))
-  expect_that(round(AIC(res), 4), equals(101.3649))
+      is_equivalent_to(c(0.4617, 0.6193, 0.2330, 0.2345, 0.2672, 0.0966,
+        0.7619, 1.4352, 0.4634)))
+  expect_that(round(AIC(res), 4), equals(119.2219))
   # All ones:
   res <- occSSrn(matrix(1, 39, 5))
   expect_that(as.vector(res$real),
@@ -164,7 +162,7 @@ test_that("occSSrnSite with logit",  {
   expect_that(round(as.vector(res$real[c(1, 4, 73, 76, 145, 148), ]), 4),
       is_equivalent_to(c(0.8613, 0.5320, 1.9756, 0.7593, 0.1567, 0.2426,
           0.4380, 0.2777, 0.5763, 0.3253, 0.0416, 0.0971, 0.9989, 0.8300,
-          6.7726, 1.7722, 0.4428, 0.4881)))
+          6.7726, 1.7721, 0.4428, 0.4881)))
       # These are the values returned by PRESENCE +/- 0.003, except for
       # psi(Unbrowsed), where PRESENCE is a bit tighter.
   expect_that(round(AIC(res), 4), equals(265.3521))

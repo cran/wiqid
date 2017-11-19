@@ -9,8 +9,10 @@ BoccSS0 <- function(y, n, psiPrior=c(1,1), pPrior=c(1,1),
   nSites <- length(y)
   if(length(n) == 1)
     n <- rep(n, nSites)
-  stopifnot(length(n) == length(y))
-  stopifnot(all(n >= y))
+  if(length(n) != length(y))
+    stop("Lengths of 'y' and 'n' must be equal.")
+  if(any(y > n))
+    stop("No value of 'y' can be greater than the corresponding 'n'.")
   known <- y > 0  # sites known to be occupied
   detected <- sum(y)
 
@@ -30,7 +32,7 @@ BoccSS0 <- function(y, n, psiPrior=c(1,1), pPrior=c(1,1),
       # 3. Update p from beta(detected+1, undetected+1) for occupied sites only.
       chain[i,2] <- rbeta(1, detected + pPrior[1], sum(n[z == 1]) - detected + pPrior[2])
     }
-    chainList[[ch]] <- mcmc(chain, start=burnin+1, end=n.iter)
+    chainList[[ch]] <- mcmc(chain[(burnin+1):n.iter, ])
   }
   # Diagnostics
   MCMC <- mcmc.list(chainList)
