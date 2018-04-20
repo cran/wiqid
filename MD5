@@ -1,6 +1,6 @@
-5d218522440c1f9fbd81c2ec0e8f4054 *DESCRIPTION
+ad720217cac19282dcd4cc7f59ffc6bf *DESCRIPTION
 012674961b4bce46f6b3a5157599c758 *NAMESPACE
-319e16fdf2302238c31b0e331b60ddce *NEWS
+e0e0cb04ec49f00a7934ff9c41046a4c *NEWS
 9a259a376f5952c5b55a6ebec45bc985 *R/AICc.R
 e4661e8dc6f1d5205c91df448813bb2c *R/AllCombinations.R
 2e7206d846129e9c4eaa77587f95e1ce *R/Bbinomial.R
@@ -55,7 +55,7 @@ fa8ec7cda0bbbb4527b4aa89655d1aa3 *R/predict.R
 2486eca4df2a7524627ea76dd201c9f2 *R/richEstimators.R
 54a7d9a21188d46fe57e4b20225e0b51 *R/richEstimatorsMore.R
 9ea707f078a0b52e7dbb749fbef5df9f *R/richRarefy.R
-7f2dbd5111eb06591435f44df03de9c3 *R/showShinyApp.R
+4df52d0c9d8be3542690d413bf116baa *R/showShinyApp.R
 5066f86f7c21aba5174f6fab8916ba7a *R/survCJS.R
 f4166d7ee1548d28f51c884db91a21c6 *R/survCJSaj.R
 6585d4a3c643b249185d9189a4ffdddf *R/survRD.R
@@ -122,7 +122,7 @@ ad4c37f7e9a5580c49ba17036e29d5e0 *man/TDist.Rd
 e175c623fa55b181dcff3f245948c79c *man/biodIndices.Rd
 2b9be1e038cadb49e18c408a55c55575 *man/closedCaptures.Rd
 995b6d52725c8d2ceee290d3f755d866 *man/densityFolded.Rd
-b63d3087080ac9d85c8a85213949dcf8 *man/dippers.Rd
+72e132e5a9f68b618a48302e9ee2aafe *man/dippers.Rd
 dcca345e0bf0b562e7aee24ec75ac815 *man/distShell.Rd
 f59585a518c8ee1abbdecfb84338daf2 *man/distTestData.Rd
 ea0520d80e066b246dd35da3bfe352bc *man/distance_measures.Rd
