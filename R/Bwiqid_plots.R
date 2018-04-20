@@ -15,6 +15,11 @@ diagPlot <- function(object, which, ask=TRUE, maxRow=4, RhatBad=1.05, ...) {
     Rhat <- rep(NA, npars)
   Rhat <- round(Rhat, 2)
 
+  n.eff <- attr(object, "n.eff")
+  if(is.null(n.eff))
+    n.eff <- rep(NA, npars)
+  n.eff <- round(n.eff)
+
   if(!missing(which)) {
     if(is.character(which))
       which <- pmatch(which, names(object))
@@ -26,6 +31,7 @@ diagPlot <- function(object, which, ask=TRUE, maxRow=4, RhatBad=1.05, ...) {
     object <- object[which]
     npars <- ncol(object)
     Rhat <- Rhat[which]
+    n.eff <- n.eff[which]
   }
 
   old.par <- par(mar = c(2,2,2, 0)+0.1, oma=c(1,1,1,1), "mfrow")
@@ -58,11 +64,14 @@ diagPlot <- function(object, which, ask=TRUE, maxRow=4, RhatBad=1.05, ...) {
     title( main = paste0(names(object[i]), ", Rhat = ", Rhat[i]),
       line=1, adj=1, col.main=1 + redFlag)
     if(redFlag)
-      box(col='red', lwd=2)
+      box(col=2, lwd=2)
     # do density plot
     density0(mat, useArgsD)
+    if(!is.na(n.eff[i]))
+      title( main = paste0("n.eff = ", n.eff[i]),
+        line=1, adj=0, col.main=1 + redFlag)
     if(redFlag)
-      box(col='red', lwd=2)
+      box(col=2, lwd=2)
   }
 }
 # ..........................................................
@@ -75,6 +84,7 @@ density0 <- function(mat, plotArgs, ...)  {
   bw <- bw.nrd0(mat)
   # histogram or density plot?
   if(max(abs(mat - floor(mat))) == 0 || bw == 0 || length(unique(mat)) == 1) {
+    # histogram
     breaks <- seq(min(mat)-1, max(mat), by=1)
     breaks2 <- hist(mat, plot=FALSE)$breaks
     if(length(breaks2) < length(breaks)) {
@@ -86,43 +96,39 @@ density0 <- function(mat, plotArgs, ...)  {
     hgt <- apply(mat, 2, function(x) hist(x, breaks=breaks, plot=FALSE)$density)
     if(!is.matrix(hgt))
       hgt <- matrix(hgt, nrow=1)
-    plot(breaks, rep(0, nb), type='n', ylim=c(0, max(hgt)), 
+    plot(breaks, rep(0, nb), type='n', ylim=c(0, max(hgt)),
       main=plotArgs$main, ylab=plotArgs$ylab, xlab=plotArgs$xlab)
     for(i in 1:ncol(mat))
       rect(breaks[-nb], rep(0, nb-1), breaks[-1], hgt[,i], border=plotArgs$col[i])
     abline(h=0)
   } else {
+    # density plot
     # deal with folding for probability and non-negative values
     meanMat <- mean(mat) # do this before folding
-    if (min(mat) >= 0 && min(mat) < 2 * bw) {
-      if (max(mat) <= 1 && 1 - max(mat) < 2 * bw) { # it's a probability
-        constrain <- 2
-        mat <- rbind(mat, -mat, 2-mat)
-      } else {                                      # it's non-negative
-        constrain <- 1
-        mat <- rbind(mat, -mat)
-      }
-    } else {
-      constrain <- 0
-    }
-
-    # All columns must have same x coordinates; see ?density for details
+    # use these values if folding is not needed:
     from <- min(mat) - 3*bw
     to <- max(mat) + 3*bw
+    mult <- 1
+    xx <- mat
+
+    if (min(mat) >= 0 && min(mat) < 2 * bw) {  # it's non-negative
+      from <- 0
+      xx <- rbind(mat, -mat)
+      mult <- 2
+    }
+    if (min(mat) >= 0 && max(mat) <= 1 &&
+          (min(mat) < 2 * bw || 1 - max(mat) < 2 * bw)) { # it's a probability
+      to <- 1
+      xx <- rbind(mat, -mat, 2-mat)
+      mult <- 3
+    }
+
+    # fit density to each column
     n <- 512
-    x <- seq(from, to, length.out=n)
-    dens <- apply(mat, 2, function(x) density(x, bw=bw, from=from, to=to, n=n)$y)
+    dens <- apply(xx, 2, function(x) density(x, bw=bw, from=from, to=to, n=n)$y)
 
-    if(constrain == 2) {         # probability
-      dens <- dens[x >=0 & x <=1, ] * 3
-      x <- x[x >=0 & x <=1]
-    } else if(constrain == 1) {  # non-negative
-      dens <- dens[x >=0, ] * 2
-      x <- x[x >=0]
-    }                            # if(constrain == 0) do nothing
-
-    plotArgs$x <- x
-    plotArgs$y <- dens
+    plotArgs$x <- seq(from, to, length.out=n)
+    plotArgs$y <- dens * mult
     do.call(matplot, plotArgs)
     abline(v=meanMat)
   }

@@ -1,13 +1,14 @@
 # NAMESPACE for package 'wiqid'
 
 importFrom("utils", "packageVersion", "head", "tail", "flush.console", "modifyList")
-importFrom("stats", "AIC", "acf", "as.dist", "as.formula", "bw.nrd0",
-   "dbinom", "density", "dpois", "median", "model.matrix",
-   "na.omit", "nlm", "optim", "optimize", "pchisq", "plogis",
-   "pnorm", "predict", "qlogis", "qnorm", "rbeta", "rbinom",
-   "rgamma", "rnorm", "runif", "sd", "terms", "var",
-   "nobs", "logLik", "update", "window",
-   "dt", "pt", "qt", "rt", "coef", "model.frame", "dnorm")
+importFrom("stats", "AIC", "acf", "as.dist", "as.formula",
+  "density", "bw.nrd0", "bw.SJ", "bw.bcv", "bw.nrd", "bw.ucv",
+  "dbinom", "dpois", "median", "model.matrix",
+  "na.omit", "nlm", "optim", "optimize", "pchisq", "plogis",
+  "pnorm", "predict", "qlogis", "qnorm", "rbeta", "rbinom",
+  "rgamma", "rnorm", "runif", "sd", "terms", "var",
+  "nobs", "logLik", "update", "window",
+  "dt", "pt", "qt", "rt", "coef", "model.frame", "dnorm")
 importFrom("coda", "mcmc", "mcmc.list", "as.mcmc.list",
   "geweke.diag", "gelman.diag", "effectiveSize")
 importFrom("HDInterval", "hdi")
@@ -43,6 +44,7 @@ export(
   AICc, allCombinations, AICtable, WAIC,
   plotComb,
   plotPost, postPriorOverlap,
+  densityFolded,
   as.Bwiqid,
   diagPlot, tracePlot, densityPlot, acfPlot,
   showShinyApp,
@@ -57,6 +59,7 @@ S3method("predict", "wiqid")
 S3method("AICc", "default")
 
 S3method("print", "Bwiqid")
+S3method("summary", "Bwiqid")
 S3method("plot", "Bwiqid")
 S3method("window", "Bwiqid")
 S3method("head", "Bwiqid")
