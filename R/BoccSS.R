@@ -54,7 +54,7 @@ BoccSS <- function(DH, model=NULL, data=NULL, priors=list(),
   # Convert the covariate data frame into a list
   dataList <- stddata(data, nSurv, scaleBy = 1)
   time <- rep(1:nSurv, each=nSites)
-  dataList$.Time <- as.vector(scale(time)) /2
+  dataList$.Time <- as.vector(scale(time)) # /2
   dataList$.time <- as.factor(time)
   before <- cbind(0L, DH[, 1:(nSurv - 1)]) # 1 if species seen on previous occasion
   dataList$.b <- as.vector(before)
@@ -83,7 +83,7 @@ BoccSS <- function(DH, model=NULL, data=NULL, priors=list(),
   # Organise and check priors
   if(!is.null(priors))  {
     priorErrorFlag <- FALSE
-    priorsDefault <- list(muPsi=0, sigmaPsi=100, muP=0, sigmaP=100)
+    priorsDefault <- list(muPsi=0, sigmaPsi=1, muP=0, sigmaP=1)
     priors <- replace (priorsDefault, names(priors), priors)
     ### TODO ### check for NAs and sigma <= 0
     muPsi <- priors$muPsi
@@ -255,18 +255,15 @@ BoccSS <- function(DH, model=NULL, data=NULL, priors=list(),
     pD <- sum(apply(lppd, 2, var)) # eqn 44
     WAIC <- tmp.sum + 2 * pD
   }
-  # Diagnostics
-  Rhat <- try(gelman.diag(MCMC, autoburnin=FALSE)$psrf[, 1], silent=TRUE)
-  if(inherits(Rhat, "try-error") || !all(is.finite(Rhat)))
-    Rhat <- NULL
 
   out <- as.Bwiqid(MCMC,
       header = "Model fitted in R with a Gibbs sampler",
       defaultPlot = names(MCMC)[1])
   attr(out, "call") <- match.call()
   attr(out, "n.chains") <- chains
-  attr(out, "n.eff") <- effectiveSize(MCMC)
-  attr(out, "Rhat") <- Rhat
+  attr(out, "n.eff") <- safeNeff(out)
+  if(chains > 1)
+    attr(out, "Rhat") <- simpleRhat(out, n.chains=chains)
   if(doWAIC)
     attr(out, "WAIC") <- c(WAIC = WAIC, pD = pD)
   attr(out, "timetaken") <- Sys.time() - startTime

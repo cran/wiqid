@@ -1,4 +1,48 @@
-CHANGES in 0.1.4 (2018-04-20)
+TODO
+
+  * deprecate Bbinom
+
+  * scrap improper default priors for Bnormal, maybe do as original version of BEST
+
+  * Improve Bsecr0...
+
+  * should as.Bwiqid.Bwiqid recalculate diagnostics?
+
+CHANGES in 0.2.1
+
+  * 'diagPlot' no longer uses its own colour palette.
+
+  * window.Bwiqid now adds new diagnostics for Rhat and n.eff.
+
+  * Rhat calculated with 'simpleRhat', n.eff with 'safeNeff' everywhere.
+
+CHANGES in 0.2.0
+
+  * Continuous covariates now standardised to mean=0, SD=1 (instead of SD=0.5).
+    Default priors for 'BoccSS' and 'BsurvCJS' changed to match this.
+
+  * Added 'standardize' and 'standardize2match' functions.
+
+  * Added 'simpleRhat' and 'getMCerror' functions; used by 'as.Bwiqid'.
+
+  * 'diagPlot' gains a 'howMany' argument to plot less than the whole chain.
+
+  * 'as.Bwiqid.data.frame' gains arguments 'n.chains', 'Rhat' and 'n.eff' and is
+    included in the help page.
+
+  * If the variance-covariance matrix cannot be calculated, MLE functions
+    now return the log(likelihood) but number of parameters, df = NA.
+
+  * 'AICc' gains a 'df' argument which overrides the df value in the model
+    object, so an AICc value can be got even if the covariance matrix cannot be
+    calculated.
+
+  * Added *beta2 and *gamma2, wrappers for *beta and *gamma with mean and sd
+    parameters, and *beta3 with mode and concentration.
+
+  * Added getBetaPar and getGammaPar to convert mean/sd parameters to shape/rate.
+
+CHANGES in 0.1.5 (2018-04-20)
 
   * Fixed check for installation of package shiny in showShinyApp.
 

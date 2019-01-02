@@ -1,7 +1,7 @@
 # diagPlot, tracePlot, densityPlot and acfPlot functions for class Bwiqid, ie. MCMC output
 
 # Function to do multiple trace and density plots
-diagPlot <- function(object, which, ask=TRUE, maxRow=4, RhatBad=1.05, ...) {
+diagPlot <- function(object, which, howMany, ask=TRUE, maxRow=4, RhatBad=1.05, ...) {
   if(!inherits(object, "Bwiqid"))
     stop("object is not a valid Bwiqid object")
   npars <- ncol(object)
@@ -10,6 +10,7 @@ diagPlot <- function(object, which, ask=TRUE, maxRow=4, RhatBad=1.05, ...) {
     warning("Invalid number of chains, treating data as a single chain")
     n.chains <- 1
   }
+  n.iter <- nrow(object) / n.chains
   Rhat <- attr(object, "Rhat")
   if(is.null(Rhat))
     Rhat <- rep(NA, npars)
@@ -19,6 +20,14 @@ diagPlot <- function(object, which, ask=TRUE, maxRow=4, RhatBad=1.05, ...) {
   if(is.null(n.eff))
     n.eff <- rep(NA, npars)
   n.eff <- round(n.eff)
+
+  if(!missing(howMany) && abs(howMany) < n.iter) {
+    if(howMany > 0) {
+      object <- window(object, end = howMany)
+    } else {
+      object <- window(object, start = n.iter + howMany)
+    }
+  }
 
   if(!missing(which)) {
     if(is.character(which))
@@ -40,11 +49,8 @@ diagPlot <- function(object, which, ask=TRUE, maxRow=4, RhatBad=1.05, ...) {
   dots <- list(...)
   if(length(dots) == 1 && class(dots[[1]]) == "list")
     dots <- dots[[1]]
-  # Recommended colours for colour-blind people:
-  cbCol <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
-    "#D55E00", "#CC79A7")
   defaultArgs <- list(xlab="Iterations", ylab="Density",
-    type='l', lty=1, col=cbCol)
+    type='l', lty=1)
   useArgsT <- useArgsD <- modifyList(defaultArgs, dots)
 
   if(npars > maxRow) {
@@ -118,7 +124,7 @@ density0 <- function(mat, plotArgs, ...)  {
     }
     if (min(mat) >= 0 && max(mat) <= 1 &&
           (min(mat) < 2 * bw || 1 - max(mat) < 2 * bw)) { # it's a probability
-      to <- 1
+      to <- min(to, 1)
       xx <- rbind(mat, -mat, 2-mat)
       mult <- 3
     }
@@ -147,10 +153,7 @@ tracePlot <- function(object, ask=TRUE, ...)  {
   dots <- list(...)
   if(length(dots) == 1 && class(dots[[1]]) == "list")
     dots <- dots[[1]]
-  # Recommended colours for colour-blind people:
-  cbCol <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
-    "#D55E00", "#CC79A7")
-  defaultArgs <- list(xlab="Iterations", type='l', lty=1, col=cbCol)
+  defaultArgs <- list(xlab="Iterations", type='l', lty=1)
   useArgs <- modifyList(defaultArgs, dots)
   mainStem <- useArgs$main
 
@@ -158,6 +161,7 @@ tracePlot <- function(object, ask=TRUE, ...)  {
     mat <- matrix(object[, i], ncol=n.chains)
     useArgs$ylab <- names(object[i])
     useArgs$y <- mat
+    useArgs$main <- names(object)[i]
     do.call(matplot, useArgs)
     abline(h=mean(mat))
   }
@@ -178,10 +182,7 @@ densityPlot <- function(object, ask=TRUE, ...)  {
   dots <- list(...)
   if(length(dots) == 1 && class(dots[[1]]) == "list")
     dots <- dots[[1]]
-  # Recommended colours for colour-blind people:
-  cbCol <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
-    "#D55E00", "#CC79A7")
-  defaultArgs <- list(ylab="Density", type='l', lty=1, col=cbCol, xlab="")
+  defaultArgs <- list(ylab="Density", type='l', lty=1, xlab="")
   useArgs <- modifyList(defaultArgs, dots)
   # mainStem <- useArgs$main
 
@@ -207,10 +208,7 @@ acfPlot <- function(object, lag.max=NULL, ask=TRUE, ...)  {
   dots <- list(...)
   if(length(dots) == 1 && class(dots[[1]]) == "list")
     dots <- dots[[1]]
-  # Recommended colours for colour-blind people:
-  cbCol <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
-    "#D55E00", "#CC79A7")
-  defaultArgs <- list(ylab="ACF", xlab="Lag", type='h', lty=1, col=cbCol)
+  defaultArgs <- list(ylab="ACF", xlab="Lag", type='h', lty=1)
   useArgs <- modifyList(defaultArgs, dots)
   # mainStem <- useArgs$main
 

@@ -90,7 +90,7 @@ Priors for \code{BsurvCJS} are listed in the \code{priors} argument, which may c
 
 \code{muPhi} and \code{muP} : the means for apparent survival and detection coefficients respectively. This may be a vector with one value for each coefficient, including the intercept, or a scalar, which will be used for all. The default is 0.
 
-\code{sigmaPhi} and \code{sigmaP} : the variance for apparent survival and detection coefficients respectively. This may be (1) a vector with one value for each coefficient, including the intercept, which represents the variance, assuming independence, or (2) a scalar, which will be used for all. The function does not currently allow a variance-covariance matrix. The default is 10, except for intercept-only models, where a default of 1 is used.
+\code{sigmaPhi} and \code{sigmaP} : the variance for apparent survival and detection coefficients respectively. This may be (1) a vector with one value for each coefficient, including the intercept, which represents the variance, assuming independence, or (2) a scalar, which will be used for all. The function does not currently allow a variance-covariance matrix. The default is 1, which is somewhat informative.
 
 When specifying priors, note that numerical covariates are standardized internally before fitting the model. For an intercept-only model, a prior of Normal(0, 1) on the probit scale implies a Uniform(0, 1) or Beta(1, 1) prior on the probability scale.
 }
@@ -102,7 +102,7 @@ When specifying priors, note that numerical covariates are standardized internal
   \item{beta }{Estimates of the coefficients in the linear predictors for phi and p.}
   \item{beta.vcv }{The variance-covariance matrix for the beta estimates.}
   \item{real }{Back-transformed estimates of phi and p for each interval / occasion. }
-  \item{logLik}{a vector with elements for log(likelihood), number of parameters, and effective sample size. If parameters \emph{and their SEs} cannot be estimated, the first element should be \code{NA}.}
+  \item{logLik}{a vector with elements for log(likelihood), number of parameters, and effective sample size. If the variance-covariance matrix cannot be calculated, the second element should be \code{NA}.}
 
 There are \code{print}, \code{logLik}, and \code{nobs} methods for class \code{wiqid}.
 
