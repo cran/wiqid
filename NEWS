@@ -1,20 +1,15 @@
-TODO
 
-  * deprecate Bbinom
+CHANGES in 0.2.2 (2019-06-05)
 
-  * scrap improper default priors for Bnormal, maybe do as original version of BEST
+  * 'diagPlot' revamped; accepts a range of classes, not just 'Bwiqid'.
 
-  * Improve Bsecr0...
+  * 'as.Bwiqid' revamped; makes more effort to retain original Rhat and n.eff; parameter
+    names conversion changed: a1[2,3] now becomes a1.2.3. instead of a12.3; original
+    names retained as attribute 'BUGSnames'.
 
-  * should as.Bwiqid.Bwiqid recalculate diagnostics?
+  * Added 'crosscorrPlot' function, which accepts a range of classes.
 
-CHANGES in 0.2.1
-
-  * 'diagPlot' no longer uses its own colour palette.
-
-  * window.Bwiqid now adds new diagnostics for Rhat and n.eff.
-
-  * Rhat calculated with 'simpleRhat', n.eff with 'safeNeff' everywhere.
+  * 'window.Bwiqid' now adds new diagnostics for Rhat and n.eff.
 
 CHANGES in 0.2.0
 

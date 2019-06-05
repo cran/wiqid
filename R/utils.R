@@ -6,15 +6,16 @@
 # getScaling, doScaling, scaleToMatch : functions to deal with scaling
 # signifish : an alternative to signif (added 10-02-2015)
 # fixCI : Calculate critical values for CI.
-# fixNames : Tidy up the column names in MCMC output: remove [] and , and make names unique.
 # getMARKci : Calculate MARK-style confidence intervals for N
 # stdModel : Regularize a list of formulae, ensuring it is a named list of one-sided formulae.
 # stddata : Convert a data frame of site and survey data into a list and standardise
 # selectCovars : Pull the covars needed for a model matrix into a specific data frame
+# matchStart : has its own file
 
+# fixNames : removed, use 'make.names(., unique=TRUE) instead (2019-04-17)
 # AICtable moved to file AICc.R
 # logSumExp etc are now in file UnderOverflow.R
-# Functions to convert parameters of distributions (eg mean and sd to shape and rate) 
+# Functions to convert parameters of distributions (eg mean and sd to shape and rate)
 #   are in converters.R
 # Variants of the t-distribution are in TDist.R
 # ...............................................................................
@@ -77,10 +78,10 @@ fixCI <- function(ci) {
 # .....................................................................
 
 # Tidy up the column names in MCMC output: remove [] and , and make names unique
-fixNames <- function(x) {
-  tmp <- sub(",", "\\.", sub("\\]", "", sub("\\[", "", x)))
-  make.unique(tmp)
-}
+# fixNames <- function(x) {
+  # tmp <- sub(",", "\\.", sub("\\]", "", sub("\\[", "", x)))
+  # make.unique(tmp)
+# }
 # .....................................................................
 
 # Function to calculate the MARK-style confidence intervals for N
@@ -129,7 +130,7 @@ stdModel <- function (model1, defaultModel) {
   }
   RHS <- function (form) {
       trms <- as.character (form)
-      if (length(trms)==3) as.formula(paste(trms[c(1,3)])) else form
+      if (length(trms)==3) as.formula(paste(trms[c(1,3)], collapse=" ")) else form
   }
   lhs <- sapply(model1, LHS)
   temp <- lapply(model1, RHS)
@@ -199,8 +200,7 @@ stddata <- function(df, nocc=NULL, scaleBy=1)  {
     dataList <- lapply(dataList, doScale)
   }
   return(dataList)
-}
-# ...........................................................................
+} # ...........................................................................
 
 # Pull the covars needed for a model matrix into a specific data frame
 selectCovars <- function(formula, dataList, minrows)  {
@@ -215,9 +215,7 @@ selectCovars <- function(formula, dataList, minrows)  {
   }
   stopifnot(nrow(df) %% minrows == 0)
   return(df)
-}
-
-
+} # ........................................................
 
 
 
