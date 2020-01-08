@@ -16,8 +16,8 @@ survCJSaj(DHj, DHa=NULL, model=list(phiJ~1, phiA~1, p~1), data=NULL,
     freqj=1, freqa=1, ci = 0.95, link=c("logit", "probit"), ...)
 
 BsurvCJS(DH, model=list(phi~1, p~1), data = NULL, freq=1, priors=NULL,
-    chains=3, sample=1e4, burnin=1000, thin=1, adapt=1000,
-    parallel = NULL, seed=NULL, priorOnly=FALSE)
+    chains=3, draws=1e4, burnin=1000, thin=1, adapt=1000,
+    parallel = NULL, seed=NULL, priorOnly=FALSE, ...)
 }
 \arguments{
   \item{DH}{
@@ -59,7 +59,7 @@ a list with elements for prior mean and variance for coefficients; see Details.
   \item{chains}{
 the number of Markov chains to run.
 }
-  \item{sample}{
+  \item{draws}{
 the minimum number of values to return; the actual number returned may be slightly higher, as it will be a multiple of \code{chains}.
 }
   \item{burnin}{
@@ -106,7 +106,7 @@ When specifying priors, note that numerical covariates are standardized internal
 
 There are \code{print}, \code{logLik}, and \code{nobs} methods for class \code{wiqid}.
 
-\code{BsurvCJS} returns an object of class \code{Bwiqid}, a data frame with columns for each p and psi value containing the series of MCMC samples, and attributes for details of the MCMC run.
+\code{BsurvCJS} returns an object of class \code{Bwiqid}, a data frame with columns for each p and psi value containing the series of MCMC draws, and attributes for details of the MCMC run.
 }
 \references{
 Lebreton, J-D; K P Burnham; J Clobert; D R Anderson. 1992. Modeling survival and testing biological hypotheses using marked animals: a unified approach with case studies. \emph{Ecological Monographs} 62:67-118.

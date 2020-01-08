@@ -15,11 +15,11 @@ Functions to estimate occupancy from detection/non-detection data for a single s
 }
 \usage{
 BoccSS0(y, n, psiPrior=c(1,1), pPrior=c(1,1),
-                    chains=3, sample=30000, burnin=100)
+                    chains=3, draws=30000, burnin=100, ...)
 
 BoccSS(DH, model=NULL, data=NULL, priors=list(),
-                    chains=3, sample=30000, burnin=1000, thin=1, parallel,
-                    seed=NULL, doWAIC=FALSE)
+                    chains=3, draws=30000, burnin=1000, thin=1, parallel,
+                    seed=NULL, doWAIC=FALSE, ...)
 }
 \arguments{
   \item{y}{
@@ -46,14 +46,14 @@ a list with elements for prior mean and variance for coefficients; see Details. 
   \item{chains}{
 number of MCMC chains to run.
 }
-  \item{sample}{
+  \item{draws}{
 minimum number of values to return. The actual number will be a multiple of the number of chains.
 }
   \item{burnin}{
 number of iterations per chain to discard as burn-in.
 }
   \item{thin}{
-the thinning interval between consecutive values in the sample
+the thinning interval between consecutive values in the chain.
 }
   \item{parallel}{
 logical; if TRUE \emph{and} \code{n.chains} > 1 \emph{and} available cores (as returned by \code{parallel::detectCores}) > 2, chains will be run in parallel. If missing, chains will be run in parallel if \code{n.chains} < available cores.
@@ -63,6 +63,9 @@ logical; if TRUE, the Watanabe-Akaike Information Criterion is calculated. NOTE:
 }
   \item{seed}{
 for reproducible results; note that parallel and sequential methods use different random number generators, so will give different results with the same seed.
+}
+  \item{...}{
+other arguments to pass to the function.
 }
 
 }
@@ -88,7 +91,6 @@ If you are unsure of the order of predictors, do a short run and check the outpu
 
 \value{
 Returns an object of class \code{Bwiqid}, which is a data frame with a column for each parameter in the model.
-
 
 There are \code{print} and \code{plot} methods for class \code{Bwiqid}, as well as \link{diagnostic plots}.
 }
@@ -116,6 +118,4 @@ tmp <- BoccSS0(y, n)
 tmp
 occSS0(y, n)  # for comparison
 plot(tmp)
-
-
 }
