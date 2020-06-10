@@ -36,11 +36,13 @@ function(DH, model=p~1, data=NULL, ci=0.95,
   # Add built-in covars to the data frame
   dataList <- stddata(data, NULL, 0.5)
   dataList$.time <- as.factor(1:nocc)
-  dataList$.Time <- as.vector(scale(1:nocc)) * 0.5
+  dataList$.Time <- standardize(1:nocc)
+  dataList$.Time2 <- dataList$.Time^2
+  dataList$.Time3 <- dataList$.Time^3
   pDf <- as.data.frame(dataList)
 
   # Do the model matrix for p:
-  pModMat <- model.matrix(model$p, pDf)
+  pModMat <- modelMatrix(model$p, pDf)
   pK <- ncol(pModMat)
   K <- pK + 1
 

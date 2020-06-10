@@ -90,14 +90,12 @@ If you are unsure of the order of predictors, do a short run and check the outpu
 }
 
 \value{
-Returns an object of class \code{Bwiqid}, which is a data frame with a column for each parameter in the model.
-
-There are \code{print} and \code{plot} methods for class \code{Bwiqid}, as well as \link{diagnostic plots}.
+Returns an object of class \code{mcmcOutput}.
 }
 
 \references{
 
-MacKenzie, D I; J D Nichols; A J Royle; K H Pollock; L L Bailey; J E Hines 2006. \emph{Occupancy estimation and modeling : inferring patterns and dynamics of species occurrence}. Elsevier Publishing.
+MacKenzie, D I; J D Nichols; A J Royle; K H Pollock; L L Bailey; J E Hines 2006. \emph{Occupancy Estimation and Modeling : Inferring Patterns and Dynamics of Species Occurrence}. Elsevier Publishing.
 
 Dorazio and Rodriguez. 2012. A Gibbs sampler for Bayesian analysis of site-occupancy data. \emph{Methods in Ecology and Evolution}, 3, 1093-1098
 }

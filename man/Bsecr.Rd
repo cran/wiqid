@@ -69,7 +69,7 @@ There are print, plot, and window methods for \code{Bwiqid}.
 \references{
 Borchers & Efford (2008) Spatially explicit maximum likelihood methods for capture-recapture studies \emph{Biometrics} 64, 377-385
 
-Royle & Dorazio (2008) \emph{Hierarchical modeling and inference in ecology}. Academic Press
+Royle & Dorazio (2008) \emph{Hierarchical Modeling and Inference in Ecology}. Academic Press
 }
 
 \author{
@@ -80,15 +80,16 @@ The function \code{secr.fit} in package \code{secr}.
 }
 \examples{
 \donttest{
-# The stoats data set in 'secr'
-require(secr)
-data(stoatDNA)
-# This takes ca 10 mins on a multicore machine:
-Bout <- Bsecr0(stoatCH, buffer=1000)
-Bout
-plot(Bout)
-# look at diagnostic plots to see if D is constrained by nAug:
-tracePlot(Bout)
-densityPlot(Bout)  # Upper values of D doesn't look constrained.
+if(requireNamespace("secr") && requireNamespace("rjags")) {
+  # The stoats data set in 'secr'
+  data(stoatDNA, package="secr")
+  # This takes ca 10 mins on a multicore machine:
+  Bout <- Bsecr0(stoatCH, buffer=1000, chains=2) # 2 chains for testing
+  summary(Bout)
+  plot(Bout)
+  # look at diagnostic plots to see if D is constrained by nAug:
+  diagPlot(Bout)      # Upper values of D doesn't look constrained.
+  plotACs(Bout, 1:20) # Plot the ACs for captured animals
+}
 }
 }

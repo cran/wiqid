@@ -59,7 +59,9 @@ BoccSS <- function(DH, model=NULL, data=NULL, priors=list(),
   # Convert the covariate data frame into a list
   dataList <- stddata(data, nSurv, scaleBy = 1)
   time <- rep(1:nSurv, each=nSites)
-  dataList$.Time <- as.vector(scale(time)) # /2
+  dataList$.Time <- standardize(time)
+  dataList$.Time2 <- dataList$.Time^2
+  dataList$.Time3 <- dataList$.Time^3
   dataList$.time <- as.factor(time)
   before <- cbind(0L, DH[, 1:(nSurv - 1)]) # 1 if species seen on previous occasion
   dataList$.b <- as.vector(before)
@@ -73,13 +75,13 @@ BoccSS <- function(DH, model=NULL, data=NULL, priors=list(),
   psiDf <- selectCovars(model$psi, dataList, nSites)
   if (nrow(psiDf) != nSites)
     stop("Number of site covars doesn't match sites.\nAre you using survey covars?")
-  psiModMat <- model.matrix(model$psi, psiDf)
+  psiModMat <- modelMatrix(model$psi, psiDf)
   if(nrow(psiModMat) != nrow(psiDf))
       stop("Missing site covariates are not allowed.")
   psiK <- ncol(psiModMat)
   pDf0 <- selectCovars(model$p, dataList, nSites*nSurv)
   pDf <- pDf0[survey.done, , drop=FALSE]
-  pModMat <- model.matrix(model$p, pDf)
+  pModMat <- modelMatrix(model$p, pDf)
   if(nrow(pModMat) != nrow(pDf))
       stop("Missing survey covariates are not allowed when a survey was done.")
   pK <- ncol(pModMat)
@@ -261,17 +263,12 @@ BoccSS <- function(DH, model=NULL, data=NULL, priors=list(),
     WAIC <- tmp.sum + 2 * pD
   }
 
-  out <- as.Bwiqid(MCMC,
-      header = "Model fitted in R with a Gibbs sampler",
-      defaultPlot = names(MCMC)[1])
+  out <- mcmcOutput(MCMC,
+      header = "Model fitted in R with a Gibbs sampler")
   attr(out, "call") <- match.call()
-  attr(out, "n.chains") <- chains
-  attr(out, "n.eff") <- safeNeff(out)
-  if(chains > 1)
-    attr(out, "Rhat") <- simpleRhat(out, n.chains=chains)
   if(doWAIC)
     attr(out, "WAIC") <- c(WAIC = WAIC, pD = pD)
-  attr(out, "timetaken") <- Sys.time() - startTime
+  attr(out, "timeTaken") <- unclass(difftime(Sys.time(), startTime, units="secs"))
   return(out)
 }
 

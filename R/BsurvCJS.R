@@ -39,15 +39,17 @@ BsurvCJS <- function(DH, model=list(phi~1, p~1), data=NULL, freq=1, priors=NULL,
 
   # Standardize the data
   dataList <- stddata(data, NULL)
-  dataList$.Time <- as.vector(scale(1:ni))
+  dataList$.Time <- standardize(1:ni)
+  dataList$.Time2 <- dataList$.Time^2
+  dataList$.Time3 <- dataList$.Time^3
   dataList$.time <- as.factor(1:ni)
 
   # Set up model matrices
   phiDf <- selectCovars(model$phi, dataList, ni)
-  phiMat <- model.matrix(model$phi, phiDf)
+  phiMat <- modelMatrix(model$phi, phiDf)
   phiK <- ncol(phiMat)
   pDf <- selectCovars(model$p, dataList, ni)
-  pMat <- model.matrix(model$p, pDf)
+  pMat <- modelMatrix(model$p, pDf)
   pK <- ncol(pMat)
   K <- phiK + pK
   if(nrow(phiMat) != ni || nrow(pMat) != ni)
@@ -141,10 +143,9 @@ BsurvCJS <- function(DH, model=list(phi~1, p~1), data=NULL, freq=1, priors=NULL,
             chains, draws, burnin, thin, adapt,
             modules = c("glm"), parallel = parallel, seed=seed)
 
-  out <- as.Bwiqid(resB,
-      header = "Model fitted in JAGS with 'rjags' functions",
-      defaultPlot = "phi.1.")
+  out <- mcmcOutput(resB,
+      header = "Model fitted in JAGS with 'rjags' functions")
   attr(out, "call") <- match.call()
-  attr(out, "timetaken") <- Sys.time() - startTime
+  attr(out, "timeTaken") <- unclass(difftime(Sys.time(), startTime, units="secs"))
   return(out)
 }
