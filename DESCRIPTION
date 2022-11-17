@@ -1,13 +1,14 @@
 Package: wiqid
 Type: Package
 Title: Quick and Dirty Estimates for Wildlife Populations
-Version: 0.3.1
-Date: 2022-06-19
+Version: 0.3.3
+Date: 2022-11-16
 Depends: HDInterval, R (>= 2.10), mcmcOutput
 Imports: stats, truncnorm, MASS, coda, plotrix
 Suggests: secr (>= 3.0), shiny, rjags
 Authors@R: c(
-  person("Mike", "Meredith", role=c("aut", "cre"), email="mike@mmeredith.net"),
+  person("Ngumbang", "Juat", role="cre", email="ngumbangjuat@hotmail.com"),
+  person("Mike", "Meredith", role="aut"),
   person("Jason", "Bryer", role="ctb", comment="showShinyApp"),
   person("John", "Kruschke", role="ctb"),
   person("Brian", "Neelon", role="ctb", comment="Bnormal"),
@@ -19,13 +20,14 @@ Description: Provides simple, fast functions for maximum likelihood and Bayesian
 Language: en-GB
 License: GPL-3
 NeedsCompilation: no
-Packaged: 2022-06-19 09:53:53 UTC; User
-Author: Mike Meredith [aut, cre],
+Packaged: 2022-11-16 10:11:22 UTC; User
+Author: Ngumbang Juat [cre],
+  Mike Meredith [aut],
   Jason Bryer [ctb] (showShinyApp),
   John Kruschke [ctb],
   Brian Neelon [ctb] (Bnormal),
   Michael Schaub [ctb] (ch2mArray),
   R Core Team [ctb] (stats::AIC code adapted for AICc)
-Maintainer: Mike Meredith <mike@mmeredith.net>
+Maintainer: Ngumbang Juat <ngumbangjuat@hotmail.com>
 Repository: CRAN
-Date/Publication: 2022-06-20 06:40:02 UTC
+Date/Publication: 2022-11-17 17:50:02 UTC
